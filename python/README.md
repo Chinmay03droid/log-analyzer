@@ -1,7 +1,7 @@
 # Log Analyzer CLI Tool
 
 A Python-based Linux command-line tool to analyze log files and summarize
- INFO, WARN and ERROR messages. The tool is containerized with Docker, supports JSON output, and is designed for sutomation and cloud workflows.
+INFO, WARN and ERROR messages. The tool is containerized with Docker, supports JSON output, and is designed for automation and cloud workflows.
 
 
 ## Features

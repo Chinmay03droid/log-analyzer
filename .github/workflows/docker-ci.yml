@@ -1,27 +1,38 @@
-name: Docker CI
+name: Log Analyzer CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
-  build:
+  python-analyzer:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
+      - name: Build Python analyzer image
+        run: docker build -t log-analyzer ./python
 
-    - name: Build Docker image
-      run: |
-        docker build -t loganalyzer .
+      - name: Test JSON output
+        shell: bash
+        run: |
+          printf 'INFO: Application started\nWARN: High memory usage\nERROR: Database connection failed\nINFO: Application recovered\n' > python/ci-sample.log
 
-    - name: Run container to validate script
-      run: |
-        docker run --rm loganalyzer
+          set +e
+          docker run --rm \
+            -v "$PWD/python:/app" \
+            log-analyzer ci-sample.log --json > output.json
+          status=$?
+          set -e
 
+          if [ "$status" -ne 2 ]; then
+            echo "Expected exit code 2 for logs containing errors; got $status"
+            cat output.json
+            exit 1
+          fi
+
+          jq -e '.INFO == 2 and .WARN == 1 and .ERROR == 1 and .total == 4' output.json

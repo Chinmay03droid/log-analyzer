@@ -4,7 +4,6 @@ import os
 import sys
 import json
 
-print("Running log analyzer...")
 
 def read_logs(filepath):
   with open(filepath, "r") as file:
@@ -63,6 +62,22 @@ def generate_report(counts, filter_level=None,json_output=False):
 
 args = [arg for arg in sys.argv[1:] if not arg.startswith("--")]
 flags = [arg for arg in sys.argv[1:] if arg.startswith("--")]
+
+if "--help" in flags:
+    print ("""
+Log Analyzer CLI
+Usage:
+  python3 analyzer.py <logfile> [LEVEL] [--json]
+
+Arguments:
+  logfile     Path to the log file
+  LEVEL       Optional filter: INFO, WARN, or ERROR
+
+Options:
+  --json      Output results in JSON format
+  --help      Display this help message
+""")
+    sys.exit(0)
 
 LOG_FILE = args[0] if len(args) > 0 else "system.log"
 CLI_FILTER = args[1].upper() if len(args) > 1 else None
